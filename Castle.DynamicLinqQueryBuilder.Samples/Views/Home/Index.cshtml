@@ -4,132 +4,156 @@
 }
 @section scripts
 {
+<link href="http://querybuilder.js.org/dist/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css" rel="stylesheet">
+<script src="http://querybuilder.js.org/dist/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
     <script type="text/javascript">
-    $(function() {
-        // Handler for .ready() called.
-        var tableData = [];
-
-        var filterDefinition = @Html.Raw(ViewBag.FilterDefinition);
-        var customFilters = {
-            condition: 'AND',
-            rules: []
-        };
-        var jqueryQueryBuilder = $('#jquery-query-builder');
-        var jqueryQueryBuilderDom = jqueryQueryBuilder.queryBuilder({
-            plugins: ['bt-tooltip-errors', 'filter-description'],
-            //allow_groups: 0,
-            allow_empty: true,
-            filters: filterDefinition,
-            rules: customFilters,
-            icons: {
-                add_group: 'fa fa-plus-square',
-                add_rule: 'fa fa-plus-circle',
-                remove_group: 'fa fa-minus-square',
-                remove_rule: 'fa fa-minus-circle',
-                error: 'fa fa-exclamation-triangle',
-                sortable: 'fa fa-exclamation-triangle'
-            }
-        });
-
-        var convertArraysToCommaDelimited = function(obj) {
-            if (obj != null) {
-                if (obj.hasOwnProperty("value")) {
-                    if( Object.prototype.toString.call( obj.value ) === '[object Array]' ) {
-                        obj.value = obj.value.join(", ");
-                    }
-                }
-                if (obj.hasOwnProperty("rules") && obj.rules != null) {
-                    for (var i = 0; i < obj.rules.length; i++) {
-                        convertArraysToCommaDelimited(obj.rules[i]);
-                    }
-                }
-            }
-        }
-        var getRules = function() {
-            try {
-                var res =  jqueryQueryBuilder.queryBuilder('getRules');
-                convertArraysToCommaDelimited(res);
-                return res;
-            } catch (ex) {
-                //console.log(ex);
-                return null;
-            }
-        }
+        $(function () {
         
-        var buildTable;
-        var filterData = function() {
-            
-            $.ajax({
-                type: 'POST',
-                url: "../Home/Index",
-                data: JSON.stringify(getRules()),
-                success: function (returnPayload) {
-                    tableData = returnPayload;
-                    buildTable();
-                    console && console.log ("request succeeded");
-                },
-                error: function (xhr, ajaxOptions, thrownError) {
-                    console && console.log ("request failed");
-                },
-                dataType: "json",
-                contentType: "application/json",            
-                processData: false,
-                async: true
-            });
-        }
 
-        $('#applyFilter').on('click', function() {
+
+            // Handler for .ready() called.
+            var tableData = [];
+
+            var filterDefinition = @Html.Raw(ViewBag.FilterDefinition);
+            var customFilters = {
+                condition: 'AND',
+                rules: []
+            };
+            var jqueryQueryBuilder = $('#jquery-query-builder');
+            var jqueryQueryBuilderDom = jqueryQueryBuilder.queryBuilder({
+                plugins: ['bt-tooltip-errors', 'filter-description'],
+                //allow_groups: 0,
+                allow_empty: true,
+                filters: filterDefinition,
+                rules: customFilters,
+                icons: {
+                    add_group: 'fa fa-plus-square',
+                    add_rule: 'fa fa-plus-circle',
+                    remove_group: 'fa fa-minus-square',
+                    remove_rule: 'fa fa-minus-circle',
+                    error: 'fa fa-exclamation-triangle',
+                    sortable: 'fa fa-exclamation-triangle'
+                }
+            });
+
+            var convertArraysToCommaDelimited = function(obj) {
+                if (obj != null) {
+                    if (obj.hasOwnProperty("value")) {
+                        if( Object.prototype.toString.call( obj.value ) === '[object Array]' ) {
+                            obj.value = obj.value.join(", ");
+                        }
+                    }
+                    if (obj.hasOwnProperty("rules") && obj.rules != null) {
+                        for (var i = 0; i < obj.rules.length; i++) {
+                            convertArraysToCommaDelimited(obj.rules[i]);
+                        }
+                    }
+                }
+            }
+            var getRules = function() {
+                try {
+                    var res =  jqueryQueryBuilder.queryBuilder('getRules');
+                    convertArraysToCommaDelimited(res);
+                    return res;
+                } catch (ex) {
+                    //console.log(ex);
+                    return null;
+                }
+            }
+
+            var buildTable;
+            var filterData = function() {
+
+                $.ajax({
+                    type: 'POST',
+                    url: "../Home/Index",
+                    data: JSON.stringify(getRules()),
+                    success: function (returnPayload) {
+                        tableData = returnPayload;
+                        buildTable();
+                        console && console.log ("request succeeded");
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        console && console.log ("request failed");
+                    },
+                    dataType: "json",
+                    contentType: "application/json",
+                    processData: false,
+                    async: true
+                });
+            }
+
+            $('#applyFilter').on('click', function() {
+                filterData();
+            });
+            buildTable = function() {
+                var tbody = $('#data-table tbody'),
+                    props = ["FirstName", "LastName", "Birthday", "Age", "Address", "City", "State", "ZipCode"];
+                tbody.empty();
+                $('#resultsCount').text(tableData.length);
+                $.each(tableData, function(i, reservation) {
+                    var tr = $('<tr>');
+                    $.each(props, function(i, prop) {
+                        $('<td>').html(reservation[prop]).appendTo(tr);
+                    });
+                    tbody.append(tr);
+                });
+            };
+
             filterData();
         });
-        buildTable = function() {
-            var tbody = $('#data-table tbody'),
-                props = ["FirstName", "LastName", "Birthday", "Age", "Address", "City", "State", "ZipCode"];
-            tbody.empty();
-            $.each(tableData, function(i, reservation) {
-                var tr = $('<tr>');
-                $.each(props, function(i, prop) {
-                    $('<td>').html(reservation[prop]).appendTo(tr);  
-                });
-                tbody.append(tr);
-            });
-        };
-
-        filterData();
-
-    });
 
 
 
-</script>
+    </script>
+    <style type="text/css">
+        .query-builder .filter-description {
+            margin-top: 0 !important;
+            padding: 2px 5px 2px 5px !important;
+        }
+        table {
+            width: 100%;
+        }
+        th {
+            background-color: #eeeeee;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
 }
 
 <div class="jumbotron">
-    <h1>Dynamic Linq Query Builder Sample</h1>
-    <p class="lead">Dynamically filter object collections based on complex queries at runtime.</p>
+    <h1>Bespoke Filters&#8482; Demo </h1>
 </div>
 
 <div class="row">
-    <div class="col-md-4">
-        <h2>Build Filters</h2>
+    <div class="col-md-12">
+        <h2>Build Search</h2>
         <div id="jquery-query-builder"></div>
-        <button id="applyFilter">Apply Filter</button>
+        <button id="applyFilter">Search</button>
+
     </div>
-    <div class="col-md-8">
-        <h2>User Data</h2>
+    <div class="col-md-12">
+        <br />
+        <b>Results Count:</b><span id="resultsCount"></span>
+        <br/><br/>
         <table id="data-table">
             <thead>
-                <tr>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Birthday</th>
-                    <th>Address</th>
-                    <th>City</th>
-                    <th>State</th>
-                    <th>Zip Code</th>
-                </tr>
+            <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Birthday</th>
+                <th>Age</th>
+                <th>Address</th>
+                <th>City</th>
+                <th>State</th>
+                <th>Zip Code</th>
+            </tr>
             </thead>
             <tbody>
-                
+
             </tbody>
         </table>
     </div>

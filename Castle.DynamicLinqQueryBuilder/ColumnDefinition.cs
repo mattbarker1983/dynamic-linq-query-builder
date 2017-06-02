@@ -116,5 +116,34 @@ namespace Castle.DynamicLinqQueryBuilder
         /// </value>
         [DataMember]
         public string Id { get; set; }
+
+        [DataMember]
+        public string Description { get; set; }
+
+
+        [DataMember]
+        public string Plugin { get; set; }
+
+        [DataMember]
+        public Plugin_Config Plugin_config { get; set; }
+    }
+
+    public class Plugin_Config
+    {
+        public Plugin_Config()
+        {
+            PrettyOutputTransformer = o => o;
+        }
+        [DataMember]
+        public string Format { get; set; }
+        [DataMember]
+        public string TodayBtn { get; set; }
+        public bool? TodayHighlight { get; set; }
+
+        public bool? Autoclose { get; set; }
+
+        [IgnoreDataMember]
+        public Func<object, object> PrettyOutputTransformer { get; set; }
+
     }
 }

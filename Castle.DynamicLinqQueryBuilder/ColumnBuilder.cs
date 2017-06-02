@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
@@ -25,6 +26,14 @@ namespace Castle.DynamicLinqQueryBuilder
             foreach (var prop in dataType.GetProperties())
             {
                 if (prop.GetCustomAttribute(typeof (IgnoreDataMemberAttribute)) != null) continue;
+
+                var description = "";
+                if (prop.GetCustomAttribute(typeof(DescriptionAttribute)) != null)
+                {
+                    DescriptionAttribute myAttribute =
+                        (DescriptionAttribute) prop.GetCustomAttribute(typeof(DescriptionAttribute));
+                    description = myAttribute.Description;
+                }
 
                 var name = camelCase ? prop.Name.ToCamelCase() : prop.Name;
 
@@ -57,7 +66,8 @@ namespace Castle.DynamicLinqQueryBuilder
                             Label = title,
                             Field = name,
                             Type = type,
-                            Id = id.ToString()
+                            Id = id.ToString(),
+                            Description = description
                         });
                         break;
                     case "integer":
@@ -66,7 +76,8 @@ namespace Castle.DynamicLinqQueryBuilder
                             Label = title,
                             Field = name,
                             Type = type,
-                            Id = id.ToString()
+                            Id = id.ToString(),
+                            Description = description
                         });
                         break;
                     case "string":
@@ -75,7 +86,8 @@ namespace Castle.DynamicLinqQueryBuilder
                             Label = title,
                             Field = name,
                             Type = type,
-                            Id = id.ToString()
+                            Id = id.ToString(),
+                            Description = description
                         });
                         break;
                     case "date":
@@ -84,7 +96,17 @@ namespace Castle.DynamicLinqQueryBuilder
                             Label = title,
                             Field = name,
                             Type = type,
-                            Id = id.ToString()
+                            Id = id.ToString(),
+                            Description = description,
+                            Plugin = "datepicker",
+                            Plugin_config =
+                            new Plugin_Config { 
+                                Format = "yyyy/mm/dd",
+                                TodayBtn= "linked",
+                                TodayHighlight= true,
+                                Autoclose= true
+                            }
+                           
                         });
                         break;
                 }
